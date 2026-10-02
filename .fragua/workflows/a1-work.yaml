@@ -1,0 +1,15 @@
+# A1: one agent step. The augmented LLM. It works; that is the point.
+name: workshop-a1
+goal: Implement a task in one agent turn.
+inputs:
+  task: { type: string, required: true, description: The task }
+defaults: { provider: anthropic, model: claude-sonnet-4-6 }
+budget: 3.00
+
+steps:
+  implement:
+    type: llm
+    allowed-tools: [read, write, edit, grep, find, bash]
+    prompt: |
+      Implement ${{ inputs.task }}. Run the relevant tests before you stop.
+    next: exit

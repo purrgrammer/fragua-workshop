@@ -1,0 +1,60 @@
+<svg viewBox="0 0 1000 860" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="review-b5-title review-b5-desc"><title id="review-b5-title">review: pack, classify, verify, sign off</title><desc id="review-b5-desc">Flowchart of the review workflow: a tool materialises the PR diff, a judge routes it to skip, a quick pass, or two parallel read-only lenses each verified by a for-each judge; a synthesis on the strongest model writes the review; a human gate posts it, asks for a rewrite, or cancels.</desc><defs>
+<marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#696969"/></marker>
+<marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#a27e58"/></marker>
+<marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4c829c"/></marker>
+</defs><rect width="100%" height="100%" fill="#f8f8f8"/>
+<rect x="340" y="244" width="480" height="148" rx="4" fill="rgba(18,18,18,0.02)" stroke="rgba(18,18,18,0.20)" stroke-width="1" stroke-dasharray="4,3"/><text x="352" y="260" fill="#696969" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.14em">PARALLEL · READ-ONLY · CONCURRENCY 2 · VERIFY EACH FINDING</text>
+<line x1="500" y1="92" x2="500" y2="124" stroke="#696969" stroke-width="1.2" marker-end="url(#arrow)"/>
+<line x1="500" y1="204" x2="500" y2="244" stroke="#696969" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M404,164 H208 Q200,164 200,172 V260" fill="none" stroke="#696969" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M596,164 H940 Q948,164 948,172 V532 Q948,540 940,540 H596" fill="none" stroke="#696969" stroke-width="1.2" marker-end="url(#arrow)"/>
+<line x1="460" y1="316" x2="460" y2="338" stroke="#696969" stroke-width="1.2" marker-end="url(#arrow)"/><line x1="700" y1="316" x2="700" y2="338" stroke="#696969" stroke-width="1.2" marker-end="url(#arrow)"/><line x1="460" y1="374" x2="460" y2="416" stroke="#696969" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M700,374 V396 Q700,404 692,404 H548 Q540,404 540,412 V416" fill="none" stroke="#696969" stroke-width="1.2" marker-end="url(#arrow)"/>
+<line x1="500" y1="472" x2="500" y2="500" stroke="#696969" stroke-width="1.2" marker-end="url(#arrow)"/>
+<path d="M200,316 V532 Q200,540 208,540 H404" fill="none" stroke="#696969" stroke-width="1.2" marker-end="url(#arrow)"/>
+<line x1="500" y1="580" x2="500" y2="632" stroke="#a27e58" stroke-width="1.4" marker-end="url(#arrow-accent)"/>
+<line x1="500" y1="688" x2="500" y2="728" stroke="#696969" stroke-width="1.2" marker-end="url(#arrow)"/>
+<rect x="540" y="216" width="32" height="12" rx="2" fill="#f8f8f8"/><text x="556" y="225" fill="#696969" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.10em">FULL</text>
+<rect x="285" y="136" width="38" height="12" rx="2" fill="#f8f8f8"/><text x="304" y="145" fill="#696969" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.10em">QUICK</text>
+<rect x="731" y="136" width="74" height="12" rx="2" fill="#f8f8f8"/><text x="768" y="145" fill="#696969" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.10em">SKIP · LGTM</text>
+<rect x="544" y="598" width="32" height="12" rx="2" fill="#f8f8f8"/><text x="560" y="607" fill="#a27e58" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.10em">POST</text>
+<rect x="537" y="472" width="62" height="12" rx="2" fill="#f8f8f8"/><text x="568" y="481" fill="#696969" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.10em">REVIEW.MD</text>
+<rect x="412" y="36" width="176" height="56" rx="4" fill="#f8f8f8"/><rect x="412" y="36" width="176" height="56" rx="4" fill="rgba(18,18,18,0.05)" stroke="#696969" stroke-width="1"/>
+<rect x="420" y="42" width="30" height="12" rx="2" fill="transparent" stroke="#696969" stroke-opacity="0.4" stroke-width="0.8"/><text x="435" y="51" fill="#696969" fill-opacity="0.85" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">TOOL</text>
+<text x="500" y="64" fill="#121212" font-size="12" font-weight="600" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">pack</text>
+<text x="500" y="80" fill="#696969" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">gh pr diff → outputs</text>
+<polygon points="500,124 596,164 500,204 404,164" fill="#f8f8f8"/><polygon points="500,124 596,164 500,204 404,164" fill="#ffffff" stroke="#121212" stroke-width="1"/>
+<text x="500" y="163" fill="#121212" font-size="11" font-weight="600" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">classify</text>
+<text x="500" y="176" fill="#696969" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">judge · depth</text>
+<rect x="120" y="260" width="160" height="56" rx="4" fill="#f8f8f8"/><rect x="120" y="260" width="160" height="56" rx="4" fill="#ffffff" stroke="#121212" stroke-width="1"/>
+<rect x="128" y="266" width="25" height="12" rx="2" fill="transparent" stroke="#121212" stroke-opacity="0.4" stroke-width="0.8"/><text x="140" y="275" fill="#121212" fill-opacity="0.85" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">LLM</text>
+<text x="200" y="288" fill="#121212" font-size="12" font-weight="600" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">review_quick</text>
+<text x="200" y="304" fill="#696969" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">reads the pack, no bash</text>
+<rect x="360" y="276" width="200" height="40" rx="4" fill="#f8f8f8"/><rect x="360" y="276" width="200" height="40" rx="4" fill="#ffffff" stroke="#121212" stroke-width="1"/>
+<rect x="368" y="282" width="65" height="12" rx="2" fill="transparent" stroke="#121212" stroke-opacity="0.4" stroke-width="0.8"/><text x="400" y="291" fill="#121212" fill-opacity="0.85" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">LLM</text>
+<text x="460" y="305" fill="#121212" font-size="12" font-weight="600" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">correctness</text>
+
+<rect x="600" y="276" width="200" height="40" rx="4" fill="#f8f8f8"/><rect x="600" y="276" width="200" height="40" rx="4" fill="#ffffff" stroke="#121212" stroke-width="1"/>
+<rect x="608" y="282" width="65" height="12" rx="2" fill="transparent" stroke="#121212" stroke-opacity="0.4" stroke-width="0.8"/><text x="640" y="291" fill="#121212" fill-opacity="0.85" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">LLM</text>
+<text x="700" y="305" fill="#121212" font-size="12" font-weight="600" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">craft</text>
+
+<polygon points="460,338 504,356 460,374 416,356" fill="#f8f8f8"/><polygon points="460,338 504,356 460,374 416,356" fill="#ffffff" stroke="#121212" stroke-width="1"/><text x="460" y="359" fill="#121212" font-size="9" font-weight="600" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">verify</text><text x="516" y="359" fill="#696969" font-size="7" font-family="'Geist Mono', ui-monospace, monospace">per finding</text><polygon points="700,338 744,356 700,374 656,356" fill="#f8f8f8"/><polygon points="700,338 744,356 700,374 656,356" fill="#ffffff" stroke="#121212" stroke-width="1"/><text x="700" y="359" fill="#121212" font-size="9" font-weight="600" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">verify</text><text x="756" y="359" fill="#696969" font-size="7" font-family="'Geist Mono', ui-monospace, monospace">per finding</text><rect x="412" y="416" width="176" height="56" rx="4" fill="#f8f8f8"/><rect x="412" y="416" width="176" height="56" rx="4" fill="#ffffff" stroke="#121212" stroke-width="1"/>
+<rect x="420" y="422" width="25" height="12" rx="2" fill="transparent" stroke="#121212" stroke-opacity="0.4" stroke-width="0.8"/><text x="432" y="431" fill="#121212" fill-opacity="0.85" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">LLM</text>
+<text x="500" y="444" fill="#121212" font-size="12" font-weight="600" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">synthesize</text>
+<text x="500" y="460" fill="#696969" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">strongest model · writes review.md</text>
+<polygon points="500,500 596,540 500,580 404,540" fill="#f8f8f8"/><polygon points="500,500 596,540 500,580 404,540" fill="rgba(162,126,88,0.10)" stroke="#a27e58" stroke-width="1"/>
+<text x="500" y="539" fill="#121212" font-size="11" font-weight="600" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">signoff</text>
+<text x="500" y="552" fill="#696969" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">human · routes</text>
+<rect x="412" y="632" width="176" height="56" rx="4" fill="#f8f8f8"/><rect x="412" y="632" width="176" height="56" rx="4" fill="rgba(18,18,18,0.05)" stroke="#696969" stroke-width="1"/>
+<rect x="420" y="638" width="30" height="12" rx="2" fill="transparent" stroke="#696969" stroke-opacity="0.4" stroke-width="0.8"/><text x="435" y="647" fill="#696969" fill-opacity="0.85" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">TOOL</text>
+<text x="500" y="660" fill="#121212" font-size="12" font-weight="600" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">post_review</text>
+<text x="500" y="676" fill="#696969" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">gh pr review --body-file</text>
+<rect x="420" y="728" width="160" height="40" rx="20" fill="rgba(18,18,18,0.03)" stroke="rgba(18,18,18,0.30)" stroke-width="1"/>
+<text x="500" y="748" fill="#121212" font-size="12" font-weight="600" font-family="'Geist', system-ui, sans-serif" text-anchor="middle">exit</text>
+<text x="500" y="761" fill="#696969" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">run_completed</text>
+<line x1="40" y1="788" x2="960" y2="788" stroke="rgba(18,18,18,0.12)" stroke-width="0.8"/><text x="40" y="804" fill="#696969" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.18em">LEGEND</text>
+<rect x="40" y="820" width="24" height="12" rx="2" fill="#ffffff" stroke="#121212" stroke-width="1"/><text x="72" y="830" fill="#696969" font-size="8.5" font-family="'Geist', system-ui, sans-serif">llm step</text>
+<rect x="216" y="820" width="24" height="12" rx="2" fill="rgba(18,18,18,0.05)" stroke="#696969" stroke-width="1"/><text x="248" y="830" fill="#696969" font-size="8.5" font-family="'Geist', system-ui, sans-serif">tool step</text>
+<polygon points="392,826 404,820 416,826 404,832" fill="#ffffff" stroke="#121212" stroke-width="1"/><text x="424" y="830" fill="#696969" font-size="8.5" font-family="'Geist', system-ui, sans-serif">decision: judge / human</text>
+<line x1="568" y1="826" x2="592" y2="826" stroke="#a27e58" stroke-width="1.4" marker-end="url(#arrow-accent)"/><text x="600" y="830" fill="#696969" font-size="8.5" font-family="'Geist', system-ui, sans-serif">first irreversible action</text>
+</svg>

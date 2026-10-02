@@ -1,0 +1,18 @@
+# B1: one agent step reviews a PR. Works. Show the transcript: serial
+# read/grep round trips, one model doing collection + judgement + writing.
+name: workshop-b1
+goal: Review a PR in one agent turn.
+inputs:
+  pr: { type: string, required: true, description: PR number }
+defaults: { provider: anthropic, model: claude-sonnet-4-6 }
+budget: 3.00
+
+steps:
+  review:
+    type: llm
+    allowed-tools: [read, grep, find, bash, write]
+    prompt: |
+      Review PR ${{ inputs.pr }}. Fetch the diff with `gh pr diff`, read
+      whatever context you need, and WRITE the review as markdown to
+      `review.md`: findings with path:line, severity, and a fix each.
+    next: exit

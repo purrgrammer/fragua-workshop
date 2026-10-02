@@ -1,0 +1,105 @@
+# A4: evaluator-optimizer, both loop shapes.
+#   review  → goal gate (`retry:`): a JUDGEMENT sends the AUTHOR back, capped.
+#   ci ↔ fix → edge cycle (`on: fail`): a deterministic CHECK sends a FIXER back, capped.
+# The reviewer reads `git diff HEAD`, not the implementer's story about it.
+name: workshop-a4
+goal: Triage, build, review with a bounded loop, ship green.
+inputs:
+  task: { type: string, required: true, description: The task }
+defaults: { provider: anthropic, model: claude-sonnet-4-6 }
+budget: 8.00
+budget-policy: pause
+
+steps:
+  triage_context:
+    type: tool
+    run: |
+      set -eu
+      out=.fragua/scratch/workshop
+      rm -rf "$out" && mkdir -p "$out"
+      awk '/^## Codebase map/,/^## Commit conventions/' AGENTS.md > "$out/codebase-map.md"
+    next: triage
+
+  triage:
+    type: judge
+    state:
+      task: ${{ inputs.task }}
+      map:  {file: .fragua/scratch/workshop/codebase-map.md}
+    questions:
+      scope:
+        type: choice
+        instructions: Classify `task` against `map` for the work pipeline.
+        criteria:
+          small:   a contained change inside one package, no shared contract touched
+          feature: multi-package, or a shared contract / schema / event changes
+          bugfix:  a reported defect, reproduce it before fixing
+    decide:
+      route: {question: scope, min-confidence: 0.6, below: feature}
+    routes:
+      small:   {to: implement, label: "Small change"}
+      feature: {to: plan,      label: "Feature scope"}
+      bugfix:  {to: reproduce, label: "Bug fix"}
+
+  plan:
+    type: llm
+    model: claude-opus-4-7            # strongest model where the thinking happens, once
+    thread: build
+    allowed-tools: [read, grep, find, ls]
+    prompt: |
+      Produce a numbered plan for ${{ inputs.task }}: files, tests (exact
+      names), exports changed, order.
+    next: implement
+
+  reproduce:
+    type: llm
+    model: claude-sonnet-4-6          # localising a bug is mechanical reading; the test is the contract
+    thread: build
+    retry: reproduce                   # no asserting failing test ⇒ try again, capped
+    max-retries: 2
+    allowed-tools: [read, write, edit, grep, find, bash]
+    prompt: |
+      Bug: ${{ inputs.task }}. Write a FAILING test in the repo's framework
+      and confirm it fails for the stated reason. Cannot localise → `abort`.
+    next: implement
+
+  implement:
+    type: llm
+    model: claude-sonnet-4-6          # cheaper: it executes a plan (or a failing test) it did not invent
+    thread: build
+    allowed-tools: [read, write, edit, grep, bash]
+    prompt: |
+      Implement ${{ inputs.task }}. Plan in this thread → realise it. Failing
+      test in this thread → make it pass without weakening it. Neither →
+      scope it yourself. End with a PLAN_REALISED block.
+    next: review
+
+  review:                              # the evaluator: fresh evidence at the point of decision
+    type: llm
+    model: claude-opus-4-7            # judgement is where being wrong costs most
+    thread: build
+    retry: implement                   # REJECT ⇒ send the author back
+    max-retries: 2                     # after 2 rejections the run pauses for a human
+    allowed-tools: [read, grep, bash]
+    prompt: |
+      Judge `git diff HEAD` against PLAN_REALISED: matches, nothing extra,
+      every promised test real and non-trivial, no scope creep.
+      `APPROVE: <one line>`, or `abort` with `REJECT: <one line>. fixes: <1-5>`.
+    next: format
+
+  format: { type: tool, run: bun run format, next: ci }
+
+  ci:                                  # the check
+    type: tool
+    run: bun run ci
+    timeout-minutes: 15
+    max-retries: 5                     # after 5 red↔fix cycles the run pauses
+    on: {success: exit, fail: fix}
+
+  fix:                                 # the fixer
+    type: llm
+    model: claude-haiku-4-5           # cheapest: read a lint error, make a one-line fix
+    allowed-tools: [read, write, edit, bash]
+    prompt: |
+      CI failed. Re-run `bun run ci`, read the failure, make the minimal fix,
+      stop. Never disable a test, lower an assertion, or relax a linter.
+    next: ci

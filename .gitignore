@@ -1,0 +1,19 @@
+node_modules
+dist
+.DS_Store
+
+# fragua runtime — never commit these
+.fragua/runs/
+.fragua/worktrees/
+.fragua/blobs/
+.fragua/fragua.db*
+.fragua/daemon/
+
+# fragua — always commit these (negative patterns for clarity)
+!.fragua/config.yaml
+!.fragua/workflows/
+
+# fragua local store + run scratch
+.fragua/workshop.db*
+.fragua/worktrees/
+.fragua/scratch/

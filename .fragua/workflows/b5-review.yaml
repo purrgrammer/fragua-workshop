@@ -1,0 +1,211 @@
+# B5: the human is a step. Everything before `signoff` is read-only and
+# replayable; `post_review` is the first write to the world. Reject is a REDO
+# (back to synthesize); discard is the operator's `cancel`.
+#
+# (B4: multiple perspectives, then verify.)
+#   Two LENSES run concurrently, un-threaded, each capped at 4 findings, each
+#   told to QUOTE the code it cites and NOT to judge its own findings.
+#   A for-each JUDGE per lens asks atomic yes/no questions against the quoted
+#   code; `keep:` drops what fails, `review:` sets aside what is torn.
+#   `synthesize` (opus) reconciles typed, already-verified arrays into review.md.
+# Model routing: sonnet finds (recall is cheap), Jev checks (~free), opus writes once.
+name: workshop-b5
+goal: B4, gated by a human before the review is posted to the PR.
+inputs:
+  pr: { type: string, required: true, description: PR number }
+defaults: { provider: anthropic, model: claude-sonnet-4-6 }
+budget: 8.00
+budget-policy: stop
+
+steps:
+  pack:
+    type: tool
+    timeout-minutes: 3
+    run: |
+      set -eu
+      pr=${{ inputs.pr }}
+      out=.fragua/scratch/workshop
+      rm -rf "$out" && mkdir -p "$out"
+      gh pr diff "$pr" > "$out/diff.patch"
+      gh pr diff "$pr" --name-only > "$out/files.txt"
+      head -c 49152 "$out/diff.patch" > "$out/diff-head.patch"
+      files=$(wc -l < "$out/files.txt" | tr -d ' ')
+      lines=$(grep -cE '^[+-][^+-]' "$out/diff.patch" || true)
+      printf '{"files_changed":%s,"lines_changed":%s}\n' "$files" "$lines" > "$FRAGUA_OUTPUT"
+    outputs:
+      files_changed: { type: number }
+      lines_changed: { type: number }
+    next: classify
+
+  classify:
+    type: judge                        # third tier: a System One model, ~$0.00002, returns probabilities
+    state:
+      files: {file: .fragua/scratch/workshop/files.txt}
+      diff:  {file: .fragua/scratch/workshop/diff-head.patch}
+    questions:
+      depth:
+        type: choice
+        instructions: How much review does the change in `diff` (touching `files`) need?
+        criteria:
+          skip:  docs, comments, whitespace, generated files, a version bump, no semantic code change
+          quick: one contained concern in code
+          full:  multi-file code, a shared contract, auth, money, parsing, migrations, concurrency
+    decide:
+      route: {question: depth, min-confidence: 0.6, below: full}
+    routes:
+      skip:  {to: lgtm,   label: "Trivial"}
+      quick: {to: review, label: "Quick review"}
+      full:  {to: lenses, label: "Full review"}
+
+  lgtm:
+    type: tool
+    run: printf '# Review\n\nLGTM, no semantic code change.\n' > review.md
+    next: signoff
+
+  review:
+    type: llm
+    model: claude-sonnet-4-6          # one contained concern; the workhorse is enough
+    allowed-tools: [read, write]
+    prompt: |
+      Review `.fragua/scratch/workshop/diff.patch`. Do not search the repo.
+      At most 4 findings with path:line, quoted code, severity, fix. WRITE to `review.md`.
+    next: signoff
+
+  lenses:                              # sectioning: two concerns, two prompts, two blind spots
+    type: parallel
+    branches: [correctness_lens, craft_lens]
+    concurrency: 2
+    timeout-minutes: 10
+    next: synthesize
+
+  correctness_lens:                    # does the code do what it claims?
+    type: llm
+    model: claude-sonnet-4-6          # recall is cheap; the judge does the checking
+    effort: medium
+    allowed-tools: [read]
+    prompt: |
+      From `.fragua/scratch/workshop/diff.patch`, find up to 4 CORRECTNESS
+      defects: wrong output, a missed edge, a race, a crash. For EACH: the
+      path:line, the claim, WHY it matters (the concrete consequence), the
+      ±15 lines pasted verbatim into `cited_code`, and in `evidence` any
+      guard or test that already covers it (or `none found`). Do not rank
+      or filter your own findings.
+    outputs:
+      findings:
+        type: array
+        items:
+          type: object
+          fields:
+            location:   { type: string }
+            claim:      { type: string }
+            why:        { type: string }
+            cited_code: { type: string }
+            evidence:   { type: string }
+    next: correctness_judge
+
+  correctness_judge:                   # N × Q atomic questions, one call
+    type: judge
+    for-each: ${{ outputs.correctness_lens.findings }}
+    questions:
+      present:
+        type: noul
+        instructions: Does `item.cited_code` show the problem described by `item.claim`?
+        criteria:
+          true:  The cited code is there as quoted and shows the problem the claim describes
+          false: The citation is missing, or the quoted code does not show what the claim says
+      refuted:
+        type: noul
+        instructions: Does `item.evidence` name something that already handles the problem in `item.claim`?
+        criteria:
+          true:  It cites a concrete guard, validation, test, or mechanism covering this exact case
+          false: It says `none found`, or what it names does not cover this case
+      severity:
+        type: score
+        instructions: Given `item.cited_code`, `item.claim` and `item.why`, how severe is the finding?
+        criteria:
+          - "low: real but marginal; note it, do not block"
+          - "medium: real and contained; fix before merge"
+          - "high: a bug that WILL trigger in real use"
+          - "critical: data loss or a crash on a normal path"
+    keep:   {present: 0.6, refuted: {max: 0.4}}
+    review: {present: {min: 0.3, max: 0.6}}   # torn: set aside, never silently dropped
+    on: {success: synthesize, fail: synthesize}
+
+  craft_lens:                          # is this the right change, well made?
+    type: llm
+    model: claude-sonnet-4-6
+    effort: medium
+    allowed-tools: [read]
+    prompt: |
+      From `.fragua/scratch/workshop/diff.patch`, find up to 4 CRAFT issues:
+      duplicated against an existing helper, fixed at the wrong depth,
+      shipped without the test that pins it, a public surface widened for no
+      caller. For EACH: path:line, the claim, WHY it costs something concrete,
+      the ±15 lines in `cited_code`, and `evidence` (or `none found`). Do not
+      rank or filter your own findings.
+    outputs:
+      findings:
+        type: array
+        items:
+          type: object
+          fields:
+            location:   { type: string }
+            claim:      { type: string }
+            why:        { type: string }
+            cited_code: { type: string }
+            evidence:   { type: string }
+    next: craft_judge
+
+  craft_judge:
+    type: judge
+    for-each: ${{ outputs.craft_lens.findings }}
+    questions:
+      present:
+        type: noul
+        instructions: Does `item.cited_code` show what `item.claim` describes?
+        criteria:
+          true:  The quoted code shows the construct the claim names
+          false: The citation is missing or shows something else
+      concrete:
+        type: noul
+        instructions: Does `item.why` name a real, nameable cost, such as wrong output, a maintenance break the next change hits, a missing test for a real path?
+        criteria:
+          true:  Names what it costs, for whom, on which path
+          false: A preference about naming or structure, a "consider…", a hypothetical
+    keep:   {present: 0.6, concrete: 0.6}
+    review: {present: {min: 0.3, max: 0.6}}
+    on: {success: synthesize, fail: synthesize}
+
+  synthesize:                          # the one step where synthesis quality is worth the price
+    type: llm
+    model: claude-opus-4-7            # strongest model, once, on already-verified input
+    effort: high
+    timeout-minutes: 8
+    allowed-tools: [read, write]
+    prompt: |
+      Reconcile two verified lens results into one review and WRITE it to
+      `review.md`. Each item carries its judge answers under `judge`.
+
+        correctness (kept): ${{ outputs.correctness_judge.kept }}
+        craft (kept):       ${{ outputs.craft_judge.kept }}
+
+      Torn on the evidence: NOT defects, list under "Follow-ups (uncertain)"
+      with their `judge.present.noul`, never discard:
+        correctness: ${{ outputs.correctness_judge.review }}
+        craft:       ${{ outputs.craft_judge.review }}
+    next: signoff
+
+  signoff:                             # the first irreversible action gets a gate
+    type: human
+    text: "Review written to review.md. Post it to PR ${{ inputs.pr }}?"
+    routes:
+      post:   {to: post_review, label: "Post to PR"}
+      accept: {to: exit,        label: "Keep local"}   # reject = operator `cancel` with a note
+
+  post_review:
+    type: tool
+    timeout-minutes: 2
+    run: |
+      pr=${{ inputs.pr }}
+      gh pr review "$pr" --comment --body-file review.md
+    next: exit

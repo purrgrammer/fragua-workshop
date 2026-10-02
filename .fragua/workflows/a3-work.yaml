@@ -1,0 +1,78 @@
+# A3: routing. Not every task deserves a plan. The classifier is a judge:
+# isolated, ~free, returns a distribution the graph can threshold. The tier
+# is TOPOLOGY: the run's path through the graph is its classification.
+name: workshop-a3
+goal: Triage a task and route it to a scope-appropriate preamble.
+inputs:
+  task: { type: string, required: true, description: The task }
+defaults: { provider: anthropic, model: claude-sonnet-4-6 }
+budget: 5.00
+
+steps:
+  triage_context:                      # what the judge sees: the codebase map, materialised by a tool
+    type: tool
+    run: |
+      set -eu
+      out=.fragua/scratch/workshop
+      rm -rf "$out" && mkdir -p "$out"
+      awk '/^## Codebase map/,/^## Commit conventions/' AGENTS.md > "$out/codebase-map.md"
+    next: triage
+
+  triage:
+    type: judge
+    state:
+      task: ${{ inputs.task }}
+      map:  {file: .fragua/scratch/workshop/codebase-map.md}
+    questions:
+      scope:
+        type: choice
+        instructions: Classify `task` against `map` for the work pipeline.
+        criteria:
+          small:   a contained change inside one package, no shared contract touched
+          feature: multi-package, or a shared contract / schema / event changes
+          bugfix:  a reported defect, reproduce it before fixing
+    decide:
+      route: {question: scope, min-confidence: 0.6, below: feature}   # when torn, do MORE thinking
+    routes:
+      small:   {to: implement, label: "Small change"}
+      feature: {to: plan,      label: "Feature scope"}
+      bugfix:  {to: reproduce, label: "Bug fix"}
+
+  plan:                                # feature preamble
+    type: llm
+    model: claude-opus-4-7            # strongest model where the thinking happens, once
+    thread: build
+    allowed-tools: [read, grep, find, ls]
+    prompt: |
+      Produce a numbered plan for ${{ inputs.task }}: files, tests (exact
+      names), exports changed, order.
+    next: implement
+
+  reproduce:                           # bugfix preamble
+    type: llm
+    model: claude-sonnet-4-6          # localising a bug is mechanical reading; the test is the contract
+    thread: build
+    allowed-tools: [read, write, edit, grep, find, bash]
+    prompt: |
+      Bug: ${{ inputs.task }}. Write a FAILING test in the repo's framework
+      and confirm it fails for the stated reason. Cannot localise → `abort`.
+    next: implement
+
+  implement:                           # the shared spine
+    type: llm
+    model: claude-sonnet-4-6          # cheaper: it executes a plan (or a failing test) it did not invent
+    thread: build
+    allowed-tools: [read, write, edit, grep, bash]
+    prompt: |
+      Implement ${{ inputs.task }}. Plan in this thread → realise it. Failing
+      test in this thread → make it pass without weakening it. Neither →
+      scope it yourself. End with a PLAN_REALISED block.
+    next: format
+
+  format: { type: tool, run: bun run format, next: ci }
+
+  ci:
+    type: tool
+    run: bun run ci
+    timeout-minutes: 15
+    next: exit

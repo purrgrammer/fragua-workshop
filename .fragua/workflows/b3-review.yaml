@@ -1,0 +1,75 @@
+# B3: decide with a probability. A judge sizes the change: skip / quick /
+# full. A `route` call gives a word; a judge gives `quick 0.55 / full 0.43`,
+# and `below: full` acts on the margin. The tier is topology.
+name: workshop-b3
+goal: Materialise, classify by depth with a judge, review at the right tier.
+inputs:
+  pr: { type: string, required: true, description: PR number }
+defaults: { provider: anthropic, model: claude-sonnet-4-6 }
+budget: 5.00
+
+steps:
+  pack:
+    type: tool
+    timeout-minutes: 3
+    run: |
+      set -eu
+      pr=${{ inputs.pr }}
+      out=.fragua/scratch/workshop
+      rm -rf "$out" && mkdir -p "$out"
+      gh pr diff "$pr" > "$out/diff.patch"
+      gh pr diff "$pr" --name-only > "$out/files.txt"
+      head -c 49152 "$out/diff.patch" > "$out/diff-head.patch"
+      files=$(wc -l < "$out/files.txt" | tr -d ' ')
+      lines=$(grep -cE '^[+-][^+-]' "$out/diff.patch" || true)
+      printf '{"files_changed":%s,"lines_changed":%s}\n' "$files" "$lines" > "$FRAGUA_OUTPUT"
+    outputs:
+      files_changed: { type: number }
+      lines_changed: { type: number }
+    next: classify
+
+  classify:
+    type: judge                        # third tier: a System One model, ~$0.00002, returns probabilities
+    state:
+      files: {file: .fragua/scratch/workshop/files.txt}
+      diff:  {file: .fragua/scratch/workshop/diff-head.patch}
+      files_changed: ${{ outputs.pack.files_changed }}
+    questions:
+      depth:
+        type: choice
+        instructions: How much review does the change in `diff` (touching `files`) need? Under-reviewing loses the review; over-reviewing wastes a dollar.
+        criteria:
+          skip:  docs, comments, whitespace, generated files, a version bump, no semantic code change
+          quick: one contained concern in code, a small fix, a single-file behaviour change, a test for existing behaviour
+          full:  multi-file code, a shared contract, auth, money, parsing, migrations, concurrency
+    decide:
+      route: {question: depth, min-confidence: 0.6, below: full}   # when torn, do MORE checking
+    routes:
+      skip:  {to: lgtm,        label: "Trivial"}
+      quick: {to: review,      label: "Quick review"}
+      full:  {to: review_full, label: "Full review"}
+
+  lgtm:
+    type: tool
+    run: printf '# Review\n\nLGTM, no semantic code change.\n' > review.md
+    next: exit
+
+  review:                              # quick tier: one focused pass
+    type: llm
+    model: claude-sonnet-4-6          # one contained concern; the workhorse is enough
+    allowed-tools: [read, write]
+    prompt: |
+      Review `.fragua/scratch/workshop/diff.patch`. Do not search the repo.
+      At most 4 findings with path:line, quoted code, severity, fix. WRITE to `review.md`.
+    next: exit
+
+  review_full:                         # full tier: B4 replaces this single step with lenses + judges
+    type: llm
+    model: claude-opus-4-7            # the change earned the expensive read
+    effort: high
+    allowed-tools: [read, grep, write]
+    prompt: |
+      Deep review of `.fragua/scratch/workshop/diff.patch`: correctness,
+      integration with callers, risk, and whether this is the right change
+      well made. Cite path:line and quote the code for every finding. WRITE to `review.md`.
+    next: exit

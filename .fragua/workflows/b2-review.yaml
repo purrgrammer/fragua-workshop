@@ -1,0 +1,39 @@
+# B2: split out the deterministic part. Collection is a `tool`: no tokens,
+# reproducible, operator-controlled data. The reviewer reads the pack and
+# cannot roam (no bash, no grep): attention goes to judgement.
+name: workshop-b2
+goal: Materialise the change with a tool, then review it from the pack.
+inputs:
+  pr: { type: string, required: true, description: PR number }
+defaults: { provider: anthropic, model: claude-sonnet-4-6 }
+budget: 3.00
+
+steps:
+  pack:
+    type: tool
+    timeout-minutes: 3
+    run: |
+      set -eu
+      pr=${{ inputs.pr }}                 # substituted values arrive quoted: bind first
+      out=.fragua/scratch/workshop
+      rm -rf "$out" && mkdir -p "$out"
+      gh pr diff "$pr" > "$out/diff.patch"
+      gh pr diff "$pr" --name-only > "$out/files.txt"
+      head -c 49152 "$out/diff.patch" > "$out/diff-head.patch"   # bounded head for the judge later
+      files=$(wc -l < "$out/files.txt" | tr -d ' ')
+      lines=$(grep -cE '^[+-][^+-]' "$out/diff.patch" || true)
+      printf '{"files_changed":%s,"lines_changed":%s}\n' "$files" "$lines" > "$FRAGUA_OUTPUT"
+    outputs:
+      files_changed: { type: number }
+      lines_changed: { type: number }
+    next: review
+
+  review:
+    type: llm
+    allowed-tools: [read, write]        # reads the pack; cannot search the repo
+    prompt: |
+      Review the change in `.fragua/scratch/workshop/diff.patch`
+      (${{ outputs.pack.files_changed }} files, ${{ outputs.pack.lines_changed }} lines).
+      Do not search the repo. At most 4 findings, each with path:line, the
+      quoted code, severity, and a fix. WRITE the review to `review.md`.
+    next: exit

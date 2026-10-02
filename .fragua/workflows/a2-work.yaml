@@ -1,0 +1,42 @@
+# A2: prompt chaining + the deterministic edges.
+# plan and implement CONVERSE, so they share a thread. format and ci never
+# needed a model. The planner physically cannot write (ACI, poka-yoke).
+name: workshop-a2
+goal: Plan, then implement, then let the machines check.
+inputs:
+  task: { type: string, required: true, description: The task }
+defaults: { provider: anthropic, model: claude-sonnet-4-6 }
+budget: 5.00
+
+steps:
+  plan:
+    type: llm
+    model: claude-opus-4-7            # strongest model where the thinking happens, once
+    thread: build
+    allowed-tools: [read, grep, find, ls]
+    prompt: |
+      Produce a numbered plan for ${{ inputs.task }}: files to touch (full
+      paths), tests to add (exact names), public exports changed, order.
+    next: implement
+
+  implement:
+    type: llm
+    model: claude-sonnet-4-6          # cheaper: it executes a plan a stronger model wrote
+    thread: build
+    allowed-tools: [read, write, edit, grep, bash]
+    prompt: |
+      Realise the plan exactly, only the files it names. Run each touched
+      package's typecheck. End with a PLAN_REALISED block: files / tests /
+      exports / skipped (with status each).
+    next: format
+
+  format:
+    type: tool
+    run: bun run format
+    next: ci
+
+  ci:
+    type: tool
+    run: bun run ci
+    timeout-minutes: 15
+    next: exit            # no fail route: a red CI halts the run. Failure handling is opt-in.
