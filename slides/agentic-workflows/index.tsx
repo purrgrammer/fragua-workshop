@@ -276,7 +276,7 @@ const Failures: Page = () => (
     <Eyebrow>What an LLM gets wrong</Eyebrow>
     <H size={56}>Six things no model fixes</H>
     <div style={{ marginTop: 28 }}>
-      <Row fail="context is a budget" so="The more you put in one window, the worse each part is handled. Evidence competes with instructions, and the middle gets lost." />
+      <Row fail="context is a budget" so="The more you put in one window, the worse each part is handled, and nothing outside it exists: not your conventions, not the helper two files over. So it starts from zero and repeats itself." />
       <Row fail="it hallucinates" so="It writes text that reads right whether or not it is right. Confidence is a property of the prose, not of the claim." />
       <Row fail="one model, one blind spot" so="Re-asking the same model gives the same priors in new words. Asking for four concerns at once gets one blended answer." />
       <Row fail="it is not deterministic" so="Same input, different path each run. Acceptable for a judgement. Unacceptable for a payment, a merge, or a message that must happen exactly once." />
@@ -404,7 +404,7 @@ const Work1: Page = () => (
 );
 
 const Work2: Page = () => (
-  <StagePage ex="A" what="build a change" n={2} title="plan then build" fail="context is a budget · it is not deterministic" broke="Attention: planning and editing in one window." added="a planner that cannot write, then tools for format and CI"
+  <StagePage ex="A" what="build a change" n={2} title="plan then build" fail="context is a budget · it is not deterministic" broke="Attention: planning and editing in one window." added="a planner that cannot write, with the repo map in AGENTS.md and skills loaded on demand, then tools for format and CI"
     ernesto={<><Mono>pulse/compose-daily-brief-v2</Mono>: typed gathers and a glue step push a dossier; one toolless agent only writes.</>}
   >
 
@@ -860,7 +860,7 @@ export const notes: (string | undefined)[] = [
   `Before any pattern names: six things models get wrong. Just the failures for now. The next pages show each one being hit on a real workflow and the step that answered it. Each version page carries one of these lines as its tag; by the end all six have been hit.`,
   `Read the big line. One agent can do this task today. What follows is not a story of failure; it is how the process gets more robust one step at a time: better outputs, the task classified so effort matches it, the expensive model spent only where it earns its keep. Each step answers one row of the table and gets its name as it appears.`,
   `Version 1, and its name: figure it out, the open loop, what the article calls an agent. One agent with every tool. It works, say so. Then the failure: it edited the wrong package, and the tests it reported running were the ones it had just written. Nothing checked the plan because there was no plan.`,
-  `Version 2. Attention is a budget. Planning and editing in one window made both worse. So: a planner on the strongest model that physically cannot write, an implementer on a cheaper model that executes a plan it did not invent, then format and CI as tools. No model needed to run a linter.`,
+  `Version 2. Attention is a budget. Planning and editing in one window made both worse, and a model that cannot see the codebase rewrites what exists. So: every step gets AGENTS.md, the repo map, and loads skills on demand. A planner on the strongest model that physically cannot write, an implementer on a cheaper model that executes a plan it did not invent, then format and CI as tools. No model needed to run a linter.`,
   `Name it: pipeline. Prompt chaining in the article. Ordered steps handing to the next, checks between. Invoice processing is this. Small reliable steps beat one big leap.`,
   `Version 3. Cost does not match stakes. A one-line fix was getting a full plan. A cheap classifier now routes: small goes straight to implement, feature gets a plan, bugfix reproduces first. The route is topology; nothing downstream re-reads a label.`,
   `Name it: triage. Routing. Classify first, route to the right path. A contract arrives and goes to the right lawyer. The classifier can be cheap because the specialists do the work.`,
