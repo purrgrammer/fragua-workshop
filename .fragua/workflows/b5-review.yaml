@@ -10,7 +10,7 @@
 #   `synthesize` (opus) reconciles typed, already-verified arrays into review.md.
 # Model routing: sonnet finds (recall is cheap), Jev checks (~free), opus writes once.
 name: workshop-b5
-goal: B4, gated by a human before the review is posted to the PR.
+goal: Lenses and verification as before, gated by a human before the review is posted to the PR.
 inputs:
   pr: { type: string, required: true, description: PR number }
 defaults: { provider: anthropic, model: claude-sonnet-4-6 }
