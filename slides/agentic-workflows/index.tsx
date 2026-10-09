@@ -1,11 +1,12 @@
 import type { DesignSystem, Page, SlideMeta } from '@open-slide/core';
-import { ImagePlaceholder, useSlidePageNumber } from '@open-slide/core';
+import { useSlidePageNumber } from '@open-slide/core';
 import coordinatorPng from './assets/coordinator.png';
 import draftPng from './assets/draft-critique.png';
 import openLoopPng from './assets/open-loop.png';
 import pipelinePng from './assets/pipeline.png';
 import reviewSvgRaw from './assets/review-b5.svg?raw';
 import splitPng from './assets/split-merge.png';
+import tracePng from './assets/trace-b5.png';
 import triagePng from './assets/triage.png';
 import workSvgRaw from './assets/work-a4.svg?raw';
 import workersPng from './assets/workers.png';
@@ -685,8 +686,8 @@ const Composed: Page = () => (
 const Trace: Page = () => (
   <div style={page}>
     <Eyebrow>The harness · every run leaves a trace</Eyebrow>
-    <div style={{ display: 'grid', gridTemplateColumns: '1300px 1fr', gap: 48, alignItems: 'start' }}>
-      <ImagePlaceholder hint="fragua run detail: b5-review on PR 139, Steps tab, paused at signoff" width={1300} height={740} />
+    <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: 48, alignItems: 'start' }}>
+      <img src={tracePng} alt="fragua run detail: b5-review on PR 139, paused at signoff" style={{ height: 740, width: 'auto', display: 'block', border: `1px solid ${hairline}`, borderRadius: 4 }} />
       <div style={{ fontSize: 28, lineHeight: 1.45 }}>
         <p style={{ margin: 0 }}>Which worker ran which step, what it decided, what it cost, and where it is waiting for a person.</p>
         <p style={{ margin: '20px 0 0', color: muted }}>Not a dashboard bolted on. The run itself. The definitions live in the repo under <Mono>.fragua/workflows/</Mono>, next to the code they act on.</p>
