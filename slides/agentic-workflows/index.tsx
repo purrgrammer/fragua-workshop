@@ -447,7 +447,7 @@ const Work3: Page = () => (
         <Line d="M86,114 H121" />
         <Line d="M234,114 H199" />
         <Line d="M160,128 V190" />
-        <N x={121} y={194} t="format · ci" kind="tool" />
+        <N x={111} y={194} w={98} t="format · ci" kind="tool" />
   </StagePage>
 );
 
@@ -650,7 +650,7 @@ const WorkFinal: Page = () => (
         <div><span style={{ fontFamily: mono, fontWeight: 600, color: accent }}>review</span> reads the diff, not the story. Rejects go back, capped.</div>
         <div><span style={{ fontFamily: mono, fontWeight: 600 }}>ci</span> is a tool. Red loops through a fixer, capped.</div>
         <div style={{ color: muted }}>Production <Mono>work.yaml</Mono> adds a fourth route, <Mono>blocked</Mono>. Every step was an edit to one file, made after a run showed why.</div>
-        <div><RunLink id="01m3vwkmt2pfz6mf92h3kmp6xj" label="open this morning's run" /></div>
+        <div><RunLink id="01m3vwkmt2pfz6mf92h3kmp6xj" label="open the run" /></div>
       </div>
     </div>
     <Footer />
