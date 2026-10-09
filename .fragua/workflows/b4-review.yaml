@@ -71,7 +71,7 @@ steps:
     type: parallel
     branches: [correctness_lens, craft_lens]
     concurrency: 2
-    timeout-minutes: 10
+    timeout-minutes: 20
     next: synthesize
 
   correctness_lens:                    # does the code do what it claims?
