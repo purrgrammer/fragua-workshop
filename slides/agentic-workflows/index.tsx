@@ -120,7 +120,13 @@ const Mono = ({ children }: { children: React.ReactNode }) => (
   <code style={{ fontFamily: mono, fontSize: '0.92em', background: surface, border: `1px solid ${hairline}`, borderRadius: 4, padding: '0 8px' }}>{children}</code>
 );
 
-const HARNESS = 'http://127.0.0.1:6868';
+const HARNESS = 'http://localhost:6868';
+const HarnessLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
+  <a href={href} target="_blank" rel="noreferrer" style={{ display: 'inline-block', fontFamily: mono, fontSize: 20, letterSpacing: '0.1em', textTransform: 'uppercase', color: accent, textDecoration: 'none', border: `1px solid ${accent}`, borderRadius: 4, padding: '8px 14px' }}>
+    {children} ↗
+  </a>
+);
+const WfLink = ({ wf, label = 'open the workflow' }: { wf: string; label?: string }) => <HarnessLink href={`${HARNESS}/workflows/${wf}`}>{label}</HarnessLink>;
 const RunLink = ({ id, label = 'open the run' }: { id: string; label?: string }) => (
   <a href={`${HARNESS}/runs/${id}`} target="_blank" rel="noreferrer" style={{ display: 'inline-block', fontFamily: mono, fontSize: 20, letterSpacing: '0.1em', textTransform: 'uppercase', color: accent, textDecoration: 'none', border: `1px solid ${accent}`, borderRadius: 4, padding: '8px 14px' }}>
     {label} ↗
@@ -264,7 +270,7 @@ const Claim: Page = () => (
   <div style={{ ...page, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
     <Eyebrow>The question</Eyebrow>
     <H size={96}>Can we write the process down as something that actually runs?</H>
-    <Lead top={48}>Closing the books. Reviewing a contract. Triaging tickets. Sourcing candidates. Reviewing pull requests. Same question for every one of them.</Lead>
+    <Lead top={48}>{'Closing the books. Reviewing a contract. Triaging tickets. Sourcing candidates. Reviewing pull requests. '}</Lead>
     <Footer />
   </div>
 );
@@ -363,7 +369,7 @@ const N = ({ x, y, w = 78, t, kind, hot }: { x: number; y: number; w?: number; t
 
 
 
-const StagePage = ({ ex, what, n, of = 5, title, fail, broke, added, ernesto, run, art, name, anthropic, anchor, children }: { ex: string; what: string; n: number; of?: number; title: string; fail: string; broke: string; added: string; ernesto: React.ReactNode; run?: string; art?: string; name?: string; anthropic?: string; anchor?: string; children?: React.ReactNode }) => (
+const StagePage = ({ ex, what, n, of = 5, title, fail, broke, added, ernesto, run, art, name, anthropic, anchor, wf, children }: { ex: string; what: string; n: number; of?: number; title: string; fail: string; broke: string; added: string; ernesto: React.ReactNode; run?: string; art?: string; name?: string; anthropic?: string; anchor?: string; wf?: string; children?: React.ReactNode }) => (
   <div style={page}>
     <Eyebrow>Example {ex} · {what} · version {n} of {of}</Eyebrow>
     <div style={{ display: 'grid', gridTemplateColumns: '800px 1fr', gap: 64, alignItems: 'start' }}>
@@ -390,7 +396,12 @@ const StagePage = ({ ex, what, n, of = 5, title, fail, broke, added, ernesto, ru
           {added}
         </p>
         <div style={{ fontSize: 23, lineHeight: 1.4, color: muted, marginTop: 16 }}><span style={{ fontFamily: mono, fontSize: 19, letterSpacing: '0.1em', color: accent }}>IN ERNESTO </span>{ernesto}</div>
-        {run && <div style={{ marginTop: 18 }}><RunLink id={run} /></div>}
+        {(wf || run) && (
+          <div style={{ marginTop: 18, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+            {wf && <WfLink wf={wf} />}
+            {run && <RunLink id={run} />}
+          </div>
+        )}
       </div>
     </div>
     <Footer />
@@ -398,13 +409,13 @@ const StagePage = ({ ex, what, n, of = 5, title, fail, broke, added, ernesto, ru
 );
 
 const Work1: Page = () => (
-  <StagePage ex="A" what="build a change" n={1} art={openLoopPng} name="figure it out" anthropic="agents, the open loop" anchor="agents" title="one agent" fail="one agent, no process" broke="Works. Edited the wrong package; the tests it ran were the ones it wrote." added="nothing yet"
+  <StagePage wf="a1-work" ex="A" what="build a change" n={1} art={openLoopPng} name="figure it out" anthropic="agents, the open loop" anchor="agents" title="one agent" fail="one agent, no process" broke="Works. The same agent does the work and verifies it." added="nothing yet"
     ernesto={<><Mono>_ernesto/ask</Mono>: a question in, one agent with read and search tools and 30 turns, an answer out. One step, nothing else.</>}
   />
 );
 
 const Work2: Page = () => (
-  <StagePage ex="A" what="build a change" n={2} title="plan then build" fail="context is a budget · it is not deterministic" broke="Attention: planning and editing in one window." added="a planner that cannot write, with the repo map in AGENTS.md and skills loaded on demand, then tools for format and CI"
+  <StagePage wf="a2-work" ex="A" what="build a change" n={2} title="plan then build" fail="context is a budget · it is not deterministic" broke="Attention: planning and editing in one window." added="a planner that cannot write, with the repo map in AGENTS.md and skills loaded on demand, then tools for format and CI"
     ernesto={<><Mono>pulse/compose-daily-brief-v2</Mono>: typed gathers and a glue step push a dossier; one toolless agent only writes.</>}
   >
 
@@ -419,7 +430,7 @@ const Work2: Page = () => (
 );
 
 const Work3: Page = () => (
-  <StagePage ex="A" what="build a change" n={3} title="triage first" fail="it does not control cost" broke="Cost does not match stakes: a one-line fix got a plan." added="a cheap classifier routes: small, feature, bugfix"
+  <StagePage wf="a3-work" ex="A" what="build a change" n={3} title="triage first" fail="it does not control cost" broke="Cost does not match stakes: a one-line fix got a plan." added="a cheap classifier routes: small, feature, bugfix"
     ernesto={<><Mono>cs/seon-denial-helper-v2</Mono> classifies the reference, then decides from a table. No agent. <Mono>sales-failed/triage-failure</Mono> adds a 30-minute operator hold.</>}
   >
         <N x={121} y={30} t="triage" kind="judge" hot />
@@ -440,7 +451,7 @@ const Work3: Page = () => (
 );
 
 const Work4: Page = () => (
-  <StagePage ex="A" what="build a change" n={4} title="review + loops" fail="it hallucinates" broke="Hallucination: the agent's own summary said it was done." added="a reviewer, an LLM that only judges: it reads the diff and sends work back, at most twice; CI loops through a fixer"
+  <StagePage wf="a4-work" ex="A" what="build a change" n={4} title="review + loops" fail="it hallucinates" broke="Hallucination: the agent's own summary said it was done." added="a reviewer, an LLM that only judges: it reads the diff and sends work back, at most twice; CI loops through a fixer"
     ernesto={<><Mono>legal/legal-dashboard-author</Mono>: draft, validate every SQL block, revise. One pass, no loop yet.</>}
     run="01m3vwkmt2pfz6mf92h3kmp6xj"
   >
@@ -461,7 +472,7 @@ const Work4: Page = () => (
 );
 
 const Work5: Page = () => (
-  <StagePage ex="A" what="build a change" n={5} title="fan out" fail="context is a budget" broke="Subtasks unknown until the plan exists." added="implement delegates one worker per package, same tree, own budget each"
+  <StagePage wf="a5-work" ex="A" what="build a change" n={5} title="fan out" fail="context is a budget" broke="Subtasks unknown until the plan exists." added="implement delegates one worker per package, same tree, own budget each"
     ernesto={<><Mono>compose-daily-brief-v2</Mono>: <Mono>foreach</Mono> steps sized at runtime by a glue step's output. No LLM coordinator in Ernesto yet.</>}
   >
 
@@ -478,7 +489,7 @@ const Work5: Page = () => (
 );
 
 const Review1: Page = () => (
-  <StagePage ex="B" what="review a change" n={1} of={5} art={openLoopPng} title="one agent" fail="one agent, no process" broke="Works. It spent most of its turns navigating the repo, and a typo got the same review as a payment change." added="nothing yet"
+  <StagePage wf="b1-review" ex="B" what="review a change" n={1} of={5} art={openLoopPng} title="one agent" fail="one agent, no process" broke="Works. It spent most of its turns navigating the repo, and a typo got the same review as a payment change." added="nothing yet"
     ernesto={<><Mono>code/weekly-digest</Mono>: one 70-turn agent composes the whole edition from the week's deltas, then a call stores it.</>}
     run="01m3vwkzwpk306f6zkpthcg1wr"
   />
@@ -487,7 +498,7 @@ const Review1: Page = () => (
 
 
 const Review2: Page = () => (
-  <StagePage ex="B" what="review a change" n={2} of={5} title="borrow the first two moves" fail="context is a budget · it does not control cost" broke="Same two problems as building, so the same two moves." added="a 5-second tool packs the diff and context, the model only reads; a cheap judge sizes the change: skip, quick or full"
+  <StagePage wf="b3-review" ex="B" what="review a change" n={2} of={5} title="borrow the first two moves" fail="context is a budget · it does not control cost" broke="Same two problems as building, so the same two moves." added="a 5-second tool packs the diff and context, the model only reads; a cheap judge sizes the change: skip, quick or full"
     ernesto={<><Mono>sales-failed/triage-failure</Mono>: routes fetch and enrich, an agent decides on a pushed dossier. <Mono>cs/seon-denial-helper-v2</Mono> classifies and decides with no agent at all.</>}
     run="01m3vwn55v43bm8jtrg97byfn4"
   >
@@ -508,7 +519,7 @@ const Review2: Page = () => (
 );
 
 const Review3: Page = () => (
-  <StagePage ex="B" what="review a change" n={3} of={5} title="lenses" fail="one model, one blind spot" broke="A full review from one model is one opinion. Asking it for four concerns at once gets one blended answer." added="parallel read-only lenses, each with one concern, then one synthesis on the strongest model"
+  <StagePage wf="b4-review" ex="B" what="review a change" n={3} of={5} title="lenses" fail="one model, one blind spot" broke="A full review from one model is one opinion. Asking it for four concerns at once gets one blended answer." added="parallel read-only lenses, each with one concern, then one synthesis on the strongest model"
     ernesto={<><Mono>agent-ops/create-brd</Mono>: <Mono>users</Mono>, <Mono>system</Mono>, <Mono>risks</Mono> mined in parallel into one dossier. <Mono>code/senior-review</Mono>: two reviewers, one PR.</>}
   >
 
@@ -524,7 +535,7 @@ const Review3: Page = () => (
 );
 
 const Review4: Page = () => (
-  <StagePage ex="B" what="review a change" n={4} of={5} title="verify every finding" fail="it hallucinates" broke="Hallucination: a finding can cite a line that does not say that, and read perfectly." added="a judge per finding checks it against the code it cites; only verified findings reach the synthesis"
+  <StagePage wf="b4-review" ex="B" what="review a change" n={4} of={5} title="verify every finding" fail="it hallucinates" broke="Hallucination: a finding can cite a line that does not say that, and read perfectly." added="a judge per finding checks it against the code it cites; only verified findings reach the synthesis"
     ernesto={<><Mono>_ernesto://evaluate</Mono> wraps Jev, the judge: a typed verdict on a claim. <Mono>legal/legal-dashboard-author</Mono> validates every SQL block before it revises.</>}
   >
 
@@ -544,7 +555,7 @@ const Review4: Page = () => (
 );
 
 const Review5: Page = () => (
-  <StagePage ex="B" what="review a change" n={5} of={5} title="human signs off" fail="it is not accountable" broke="Not accountable: posting to the PR is the first irreversible step." added="a human gate: post, keep local, or cancel"
+  <StagePage wf="b5-review" ex="B" what="review a change" n={5} of={5} title="human signs off" fail="it is not accountable" broke="Not accountable: posting to the PR is the first irreversible step." added="a human gate: post, keep local, or cancel"
     ernesto={<><Mono>finance/submit-expense</Mono> confirms before filing; <Mono>devin-run-playbook</Mono> previews, confirms, then executes.</>}
     run="01m3vzq6nkfsh311vz1t6cmfzv"
   >
@@ -681,7 +692,7 @@ const Trace: Page = () => (
         <p style={{ margin: '20px 0 0', color: muted }}>Not a dashboard bolted on. The run itself. The definitions live in the repo under <Mono>.fragua/workflows/</Mono>, next to the code they act on.</p>
         <div style={{ marginTop: 28, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
           <RunLink id="01m3vzq6nkfsh311vz1t6cmfzv" label="open the paused run" />
-          <a href={`${HARNESS}/workflows/b5-review`} target="_blank" rel="noreferrer" style={{ display: 'inline-block', fontFamily: mono, fontSize: 20, letterSpacing: '0.1em', textTransform: 'uppercase', color: accent, textDecoration: 'none', border: `1px solid ${accent}`, borderRadius: 4, padding: '8px 14px' }}>open the workflow ↗</a>
+          <WfLink wf="b5-review" />
         </div>
       </div>
     </div>
