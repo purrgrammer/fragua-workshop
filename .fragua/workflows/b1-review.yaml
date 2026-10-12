@@ -4,7 +4,7 @@ name: workshop-b1
 goal: Review a PR in one agent turn.
 inputs:
   pr: { type: string, required: true, description: PR number }
-defaults: { provider: anthropic, model: claude-sonnet-5-5 }
+defaults: { provider: anthropic, model: claude-sonnet-4-6 }
 budget: 3.00
 
 steps:

@@ -5,7 +5,7 @@ name: workshop-b2
 goal: Materialise the change with a tool, then review it from the pack.
 inputs:
   pr: { type: string, required: true, description: PR number }
-defaults: { provider: anthropic, model: claude-sonnet-5-5 }
+defaults: { provider: anthropic, model: claude-sonnet-4-6 }
 budget: 3.00
 
 steps:

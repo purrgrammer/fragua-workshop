@@ -5,13 +5,13 @@ name: workshop-a2
 goal: Plan, then implement, then let the machines check.
 inputs:
   task: { type: string, required: true, description: The task }
-defaults: { provider: anthropic, model: claude-sonnet-5-5 }
+defaults: { provider: anthropic, model: claude-sonnet-4-6 }
 budget: 5.00
 
 steps:
   plan:
     type: llm
-    model: claude-opus-5-5            # strongest model where the thinking happens, once
+    model: claude-opus-4-7            # strongest model where the thinking happens, once
     thread: build
     allowed-tools: [read, grep, find, ls]
     prompt: |
@@ -21,7 +21,7 @@ steps:
 
   implement:
     type: llm
-    model: claude-sonnet-5-5          # cheaper: it executes a plan a stronger model wrote
+    model: claude-sonnet-4-6          # cheaper: it executes a plan a stronger model wrote
     thread: build
     allowed-tools: [read, write, edit, grep, bash]
     prompt: |
