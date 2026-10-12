@@ -5,7 +5,7 @@ name: workshop-a3
 goal: Triage a task and route it to a scope-appropriate preamble.
 inputs:
   task: { type: string, required: true, description: The task }
-defaults: { provider: anthropic, model: claude-sonnet-4-6 }
+defaults: { provider: anthropic, model: claude-sonnet-5-5 }
 budget: 5.00
 
 steps:
@@ -40,7 +40,7 @@ steps:
 
   plan:                                # feature preamble
     type: llm
-    model: claude-opus-4-7            # strongest model where the thinking happens, once
+    model: claude-opus-5-5            # strongest model where the thinking happens, once
     thread: build
     allowed-tools: [read, grep, find, ls]
     prompt: |
@@ -50,7 +50,7 @@ steps:
 
   reproduce:                           # bugfix preamble
     type: llm
-    model: claude-sonnet-4-6          # localising a bug is mechanical reading; the test is the contract
+    model: claude-sonnet-5-5          # localising a bug is mechanical reading; the test is the contract
     thread: build
     allowed-tools: [read, write, edit, grep, find, bash]
     prompt: |
@@ -60,7 +60,7 @@ steps:
 
   implement:                           # the shared spine
     type: llm
-    model: claude-sonnet-4-6          # cheaper: it executes a plan (or a failing test) it did not invent
+    model: claude-sonnet-5-5          # cheaper: it executes a plan (or a failing test) it did not invent
     thread: build
     allowed-tools: [read, write, edit, grep, bash]
     prompt: |

@@ -5,7 +5,7 @@ name: workshop-b3
 goal: Materialise, classify by depth with a judge, review at the right tier.
 inputs:
   pr: { type: string, required: true, description: PR number }
-defaults: { provider: anthropic, model: claude-sonnet-4-6 }
+defaults: { provider: anthropic, model: claude-sonnet-5-5 }
 budget: 5.00
 
 steps:
@@ -56,7 +56,7 @@ steps:
 
   review:                              # quick tier: one focused pass
     type: llm
-    model: claude-sonnet-4-6          # one contained concern; the workhorse is enough
+    model: claude-sonnet-5-5          # one contained concern; the workhorse is enough
     allowed-tools: [read, write]
     prompt: |
       Review `.fragua/scratch/workshop/diff.patch`. Do not search the repo.
@@ -65,7 +65,7 @@ steps:
 
   review_full:                         # full tier: B4 replaces this single step with lenses + judges
     type: llm
-    model: claude-opus-4-7            # the change earned the expensive read
+    model: claude-opus-5-5            # the change earned the expensive read
     effort: high
     allowed-tools: [read, grep, write]
     prompt: |

@@ -3,7 +3,7 @@ name: workshop-a1
 goal: Implement a task in one agent turn.
 inputs:
   task: { type: string, required: true, description: The task }
-defaults: { provider: anthropic, model: claude-sonnet-4-6 }
+defaults: { provider: anthropic, model: claude-sonnet-5-5 }
 budget: 3.00
 
 steps:

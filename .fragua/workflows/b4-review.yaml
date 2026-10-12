@@ -9,7 +9,7 @@ name: workshop-b4
 goal: Classify by depth; full tier = two lenses → for-each judges → one synthesis.
 inputs:
   pr: { type: string, required: true, description: PR number }
-defaults: { provider: anthropic, model: claude-sonnet-4-6 }
+defaults: { provider: anthropic, model: claude-sonnet-5-5 }
 budget: 8.00
 budget-policy: stop
 
@@ -60,7 +60,7 @@ steps:
 
   review:
     type: llm
-    model: claude-sonnet-4-6          # one contained concern; the workhorse is enough
+    model: claude-sonnet-5-5          # one contained concern; the workhorse is enough
     allowed-tools: [read, write]
     prompt: |
       Review `.fragua/scratch/workshop/diff.patch`. Do not search the repo.
@@ -76,7 +76,7 @@ steps:
 
   correctness_lens:                    # does the code do what it claims?
     type: llm
-    model: claude-sonnet-4-6          # recall is cheap; the judge does the checking
+    model: claude-sonnet-5-5          # recall is cheap; the judge does the checking
     effort: medium
     allowed-tools: [read]
     prompt: |
@@ -129,7 +129,7 @@ steps:
 
   craft_lens:                          # is this the right change, well made?
     type: llm
-    model: claude-sonnet-4-6
+    model: claude-sonnet-5-5
     effort: medium
     allowed-tools: [read]
     prompt: |
@@ -174,7 +174,7 @@ steps:
 
   synthesize:                          # the one step where synthesis quality is worth the price
     type: llm
-    model: claude-opus-4-7            # strongest model, once, on already-verified input
+    model: claude-opus-5-5            # strongest model, once, on already-verified input
     effort: high
     timeout-minutes: 8
     allowed-tools: [read, write]
